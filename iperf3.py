@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import signal
-from concurrent.futures import as_completed
+import concurrent.futures
 from modules.scriptBaseClass import scriptBase, threadPoolListObj
 from modules.iperfClientClass import iperfClient
 from modules.iperfServerClass import iperfServer
@@ -63,15 +63,16 @@ for client in args.client:
 # start the iperf3 server
 iperfTarget.startIperf3ServerDaemon()
 
+iperfClientThreadPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 futures=[]
 # use the script class thread pool executor to have the iperf3 clients stream data
-with script.threadPool as executor:
+with iperfClientThreadPool as executor:
     for client in iperfClientList:
         fut = executor.submit(startClientIo, client)
         futures.append(fut)
 
 # As the jobs are completed, print out the results
-for fut in as_completed(futures):
+for fut in concurrent.futures.as_completed(futures):
     print(fut.result())
 
 # shutdown the iperf3 server
