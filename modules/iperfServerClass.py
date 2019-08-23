@@ -16,7 +16,7 @@ class iperfServer(hostBase):
 
     def stopIperf3ServerDaemon(self):
         self.iperfServerLogger.info( '%s: iperf3 server shutting down' % (self.ipAddress))
-        self.stopProcess(self.iperf3Name)
-
+        result = self.stopProcess(self.iperf3Name)
+        return result
 
 

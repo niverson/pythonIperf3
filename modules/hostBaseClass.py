@@ -19,3 +19,5 @@ class hostBase(cliBase):
                 self.hostLogger.error('kill %s returned %s' % (processName,result.returncode))
         else:
             self.hostLogger.error('pgrep returned %s' % (result.returncode))
+
+        return result.returncode

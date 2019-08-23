@@ -13,7 +13,8 @@ def startClientIo( threadPoolObj ):
 
 # cleanup function to shutdown the iperf3 server
 def cleanUp(iperfTarget):
-    iperfTarget.stopIperf3ServerDaemon()
+    result = iperfTarget.stopIperf3ServerDaemon()
+    return result
 
 def sigint_cleanup(signum, frame):
     # switch the CTRL-C handler to just exit if is pressed repeatedly
@@ -49,6 +50,8 @@ logger.setLevel(logging.DEBUG)
 # setup the clean-up handler
 signal.signal(signal.SIGINT, sigint_cleanup)
 
+returncode = 0
+
 # create the iperf3 object to test
 iperfTarget = iperfServer(args.server)
 
@@ -59,9 +62,11 @@ for client in args.client:
     threadPoolObj.targetIpAddress = args.server
     iperfClientList.append(threadPoolObj)
 
-
 # start the iperf3 server
-iperfTarget.startIperf3ServerDaemon()
+result = iperfTarget.startIperf3ServerDaemon()
+if result.returncode != 0:
+    returncode |= result.returncode
+
 
 iperfClientThreadPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 futures=[]
@@ -73,9 +78,13 @@ with iperfClientThreadPool as executor:
 
 # As the jobs are completed, print out the results
 for fut in concurrent.futures.as_completed(futures):
-    print(fut.result())
+    if fut.result():
+        returncode |= fut.result().returncode
+
 
 # shutdown the iperf3 server
-cleanUp(iperfTarget)
+returncode |= cleanUp(iperfTarget)
+
+exit(returncode)
 
 
