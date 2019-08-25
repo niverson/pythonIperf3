@@ -58,7 +58,8 @@ iperfTarget = iperfServer(args.server)
 # create as many clients as specified on the commandline and put them in an iterable object
 for client in args.client:
     threadPoolObj = threadPoolListObj()
-    threadPoolObj.clientObj = iperfClient(client)
+    logfile = '%s/%s__'% (script.logfileDirectory, client) + script.utcNow.strftime('%Y_%m_%d__%H_%M_%S') +'.log'
+    threadPoolObj.clientObj = iperfClient(client, logfile)
     threadPoolObj.targetIpAddress = args.server
     iperfClientList.append(threadPoolObj)
 
@@ -80,7 +81,8 @@ with iperfClientThreadPool as executor:
 for fut in concurrent.futures.as_completed(futures):
     if fut.result():
         returncode |= fut.result().returncode
-
+        if returncode == 0:
+            print( fut.result() )
 
 # shutdown the iperf3 server
 returncode |= cleanUp(iperfTarget)

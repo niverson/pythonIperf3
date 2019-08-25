@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('run') {
             steps {
-                sh './iperf3.py 192.168.86.34 192.168.86.20'
+                sh './iperf3.py 192.168.86.34 192.168.86.30'
             }
         }
     }
