@@ -7,11 +7,21 @@ class hostBase(cliBase):
         self.hostLogger = logging.getLogger(__name__)
         self.hostLogger.setLevel(logging.DEBUG)
 
+    def __str__(self):
+        return f"{self.ipAddress}"
+
+    def __repr__(self):
+        return f"{self.ipAddress}"
+
     def stopProcess(self, processName ):
+        """look up and kill a process on the host"""
         self.hostLogger.info( 'looking for %s on %s' % (processName, self.ipAddress))
+
+        # get the process id with the process is running on the host
         result = self.executeBashCommand('pgrep %s' % processName)
 
         if result.returncode == 0:
+            # kill the process on the host
             result = self.executeBashCommand('kill -6 %s' % result.stdout.decode())
             if result.returncode == 0:
                 self.hostLogger.info('%s stopped on %s' % (processName,self.ipAddress))

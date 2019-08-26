@@ -7,14 +7,20 @@ class cliBase( ):
         self.cliLogger = logging.getLogger(__name__)
         self.cliLogger.setLevel(logging.DEBUG)
 
+    def __str__(self):
+        return f"{self.ipAddress}"
+
+    def __repr__(self):
+        return f"{self.ipAddress}"
+
     def executeBashCommand(self, cmdString):
-        """ssh into the server and execute the passed in command return the result"""
+        """ssh into the server and execute the passed in command. return the result"""
         result = self.executeBashCommandWithTimeout(cmdString, 30)
         return result
 
 
     def executeBashCommandWithTimeout(self, cmdString, userTimeout):
-        """ssh into the server and execute the passed in command with user defined timeout and return the result"""
+        """ssh into the server and execute the passed in command with user defined timeout. return the result"""
         result = None
         self.cliLogger.info('sending %s' % cmdString)
 

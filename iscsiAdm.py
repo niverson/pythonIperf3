@@ -37,9 +37,8 @@ def sigint_exit(signum, frame):
     exit(2)
 
 # setup the script object
-script = scriptBase('iscsiAdm')
-iscsiAdmClientList=[]
-
+executableName = 'iscsiadm'
+script = scriptBase(executableName)
 
 # add other arguments here to supplement the default arguments in the script base class
 script.parser.add_argument('-port', help="iscsi target user defined port", type=int)
@@ -56,6 +55,13 @@ script.setLogging(args.slvl,args.flvl)
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
+iscsiAdmClientList=[]
+returncode = 0
+
+iscsiTargetPort = 3260  # this is the default value
+if args.port:
+    iscsiTargetPort = args.port
+
 # setup the clean-up handler
 signal.signal(signal.SIGINT, sigint_cleanup)
 
@@ -64,15 +70,14 @@ for host in args.iscsiAdmHost:
     threadPoolObj = threadPoolListObj()
     threadPoolObj.iscsiadmHost = iscsiadm(host)
     threadPoolObj.targetIpAddress = args.target
-    if args.port:
-        threadPoolObj.port = args.port
+    threadPoolObj.port = iscsiTargetPort
     iscsiAdmClientList.append(threadPoolObj)
 
 
 
 discoveriesThreadPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 discoveries=[]
-# use the script class thread pool executor to have iscsiadm discover targets.
+# use the discoveries thread pool executor to have iscsiadm discover targets.
 with discoveriesThreadPool as discoveryExecutor:
     for client in iscsiAdmClientList:
         fut = discoveryExecutor.submit(discoverTargets, client)
@@ -81,12 +86,12 @@ with discoveriesThreadPool as discoveryExecutor:
 # As the jobs are completed, print out the results
 for fut in concurrent.futures.as_completed(discoveries):
     if fut.result() != 0:
-        # FIXME do something about the fail host or just continue on if not all failed?
-        pass
+        returncode |= fut.result()
+
 
 loginsThreadPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 logins=[]
-# use the script class thread pool executor to have iscsiadm discover targets.
+# use the logins thread pool executor to have iscsiadm log in to the targets.
 with loginsThreadPool as loginExecutor:
     for client in iscsiAdmClientList:
         fut = loginExecutor.submit(logIntoTargets, client)
@@ -95,13 +100,16 @@ with loginsThreadPool as loginExecutor:
 # As the jobs are completed, print out the results
 for fut in concurrent.futures.as_completed(logins):
     if fut.result() != 0:
-        # FIXME do something about the fail host or just continue on if not all failed?
-        pass
+        returncode |= fut.result()
+
+
+
+# FIXME add code here to run IO to the targets from or do some other testing
 
 
 logoutThreadPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 logouts=[]
-# use the script class thread pool executor to have iscsiadm discover targets.
+# use the logout thread pool executor to have iscsiadm logout all known targets.
 with logoutThreadPool as logoutExecutor:
     for client in iscsiAdmClientList:
         fut = logoutExecutor.submit(logoutTargets, client)
@@ -110,10 +118,11 @@ with logoutThreadPool as logoutExecutor:
 # As the jobs are completed, print out the results
 for fut in concurrent.futures.as_completed(logouts):
     if fut.result() != 0:
-        # FIXME do something about the fail host or just continue on if not all failed?
-        pass
+        returncode |= fut.result()
 
 # shutdown the iperf3 server
 cleanUp(iscsiAdmClientList)
+
+exit(returncode)
 
 
