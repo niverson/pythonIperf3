@@ -5,9 +5,12 @@ This project has two script files: iperf3.py and iscsiAdm.py
 written for python3(3.6.8)
 
 
-iperf3.py is a quick bandwidth test between a server and n number of clients as defined on the commandline. iperf3.py will first start an iperf3 server on the "server" system. Next, iperf3.py will use the "client" systems to drive traffic to the "server" system. Finally, iperf3.py will kill the iperf3 server on the "server" system.
+iperf3.py is a quick bandwidth test between a server and n number of clients as defined on the commandline. 
+iperf3.py will first start an iperf3 server on the "server" system. Next, iperf3.py will use the "client" systems 
+to drive traffic to the "server" system. Finally, iperf3.py will kill the iperf3 server on the "server" system.
 
-To use, the server and the clients must have iperf3 installed. The firewall on the server system must be disabled or the port # the iperf3 server uses must be opened in the firewall.
+To use, the server and the clients must have iperf3 installed. The firewall on the server system must be disabled 
+or the port # the iperf3 server uses must be opened in the firewall.
 
 Sample commandline/screen output:
 
@@ -25,7 +28,8 @@ niverson@Gengar:~/pythonProjects$ ./iperf3.py 192.168.86.30 192.168.86.34
 
 
 
-iscsiAdm.py is a simple connectivity test that uses iscsiadm on the iscsiAdmHost to discover the iscsi target, log into the iscsi target, then logout of the iscsi target. 
+iscsiAdm.py is a simple connectivity test that uses iscsiadm on the iscsiAdmHost to discover the iscsi target, 
+log into the iscsi target, then logout of the iscsi target. 
 
 To use, the target must already be setup and configured to let the iscsiAdmHost login.
 
