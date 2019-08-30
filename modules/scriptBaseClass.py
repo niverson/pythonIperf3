@@ -2,11 +2,6 @@ import argparse
 import logging
 import datetime
 
-
-class threadPoolListObj():
-    pass
-
-
 class scriptBase( ):
 
     def __init__(self, logFilePrefix):

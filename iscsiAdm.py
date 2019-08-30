@@ -2,23 +2,26 @@
 import logging
 import signal
 import concurrent.futures
-from modules.scriptBaseClass import scriptBase, threadPoolListObj
+from modules.scriptBaseClass import scriptBase
 from modules.iscsiadmClass import iscsiadm
 
 
+class poolListObj():
+    pass
+
 # function for threading the IO clients
-def discoverTargets( threadPoolObj ):
-    result = threadPoolObj.iscsiadmHost.discoverTarget(threadPoolObj.targetIpAddress, threadPoolObj.port)
+def discoverTargets( poolObj ):
+    result = poolObj.iscsiadmHost.discoverTarget(poolObj.targetIpAddress, poolObj.port)
     return result
 
 # function for threading the IO clients
-def logIntoTargets( threadPoolObj ):
-    result = threadPoolObj.iscsiadmHost.logInToTargets()
+def logIntoTargets( poolObj ):
+    result = poolObj.iscsiadmHost.logInToTargets()
     return result
 
 # function for threading the IO clients
-def logoutTargets( threadPoolObj ):
-    result = threadPoolObj.iscsiadmHost.logoutTargets()
+def logoutTargets( poolObj ):
+    result = poolObj.iscsiadmHost.logoutTargets()
     return result
 
 # cleanup function to shutdown the iperf3 server
@@ -29,7 +32,7 @@ def sigint_cleanup(signum, frame):
     # switch the CTRL-C handler to just exit if is pressed repeatedly
     signal.signal(signal.SIGINT, sigint_exit)
     logger.error('CTRL-C detected')
-    cleanUp(iperfServer )
+    cleanUp(iscsiAdmClientList )
     exit(1)
 
 def sigint_exit(signum, frame):
@@ -67,11 +70,11 @@ signal.signal(signal.SIGINT, sigint_cleanup)
 
 # create as many iscsiadm hosts as specified on the commandline and put them in an iterable object
 for host in args.iscsiAdmHost:
-    threadPoolObj = threadPoolListObj()
-    threadPoolObj.iscsiadmHost = iscsiadm(host)
-    threadPoolObj.targetIpAddress = args.target
-    threadPoolObj.port = iscsiTargetPort
-    iscsiAdmClientList.append(threadPoolObj)
+    poolObj = poolListObj()
+    poolObj.iscsiadmHost = iscsiadm(host)
+    poolObj.targetIpAddress = args.target
+    poolObj.port = iscsiTargetPort
+    iscsiAdmClientList.append(poolObj)
 
 
 
