@@ -2,37 +2,37 @@
 import logging
 import signal
 import concurrent.futures
-from modules.scriptBaseClass import scriptBase
-from modules.iscsiadmClass import iscsiadm
+from modules.scriptBaseClass import ScriptBase
+from modules.iscsiadmClass import Iscsiadm
 
 
-class poolListObj():
+class PoolListObj():
     pass
 
 # function for threading the IO clients
-def discoverTargets( poolObj ):
-    result = poolObj.iscsiadmHost.discoverTarget(poolObj.targetIpAddress, poolObj.port)
+def discover_targets( pool_obj ):
+    result = pool_obj.iscsiadm_host.discover_target(pool_obj.target_ip_address, pool_obj.port)
     return result
 
 # function for threading the IO clients
-def logIntoTargets( poolObj ):
-    result = poolObj.iscsiadmHost.logInToTargets()
+def log_in_to_targets( pool_obj ):
+    result = pool_obj.iscsiadm_host.log_in_to_targets()
     return result
 
 # function for threading the IO clients
-def logoutTargets( poolObj ):
-    result = poolObj.iscsiadmHost.logoutTargets()
+def logout_targets( pool_obj ):
+    result = pool_obj.iscsiadm_host.logout_targets()
     return result
 
 # cleanup function to shutdown the iperf3 server
-def cleanUp(iscsiAdmClientList):
+def clean_up(iscsi_adm_client_list):
     pass
 
 def sigint_cleanup(signum, frame):
     # switch the CTRL-C handler to just exit if is pressed repeatedly
     signal.signal(signal.SIGINT, sigint_exit)
     logger.error('CTRL-C detected')
-    cleanUp(iscsiAdmClientList )
+    clean_up(iscsiadm_client_list )
     exit(1)
 
 def sigint_exit(signum, frame):
@@ -40,8 +40,8 @@ def sigint_exit(signum, frame):
     exit(2)
 
 # setup the script object
-executableName = 'iscsiadm'
-script = scriptBase(executableName)
+executable_name = 'iscsiadm'
+script = ScriptBase(executable_name)
 
 # add other arguments here to supplement the default arguments in the script base class
 script.parser.add_argument('-port', help="iscsi target user defined port", type=int)
@@ -52,38 +52,38 @@ script.parser.add_argument('iscsiAdmHost', help="iscsiadm host ipAddress", type=
 args = script.parser.parse_args()
 
 # initialize the script logging once.
-script.setLogging(args.slvl,args.flvl)
+script.set_logging(args.slvl, args.flvl)
 
 # create the logger object for this file
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
-iscsiAdmClientList=[]
+iscsiadm_client_list=[]
 returncode = 0
 
-iscsiTargetPort = 3260  # this is the default value
+iscsi_target_port = 3260  # this is the default value
 if args.port:
-    iscsiTargetPort = args.port
+    iscsi_target_port = args.port
 
 # setup the clean-up handler
 signal.signal(signal.SIGINT, sigint_cleanup)
 
 # create as many iscsiadm hosts as specified on the commandline and put them in an iterable object
 for host in args.iscsiAdmHost:
-    poolObj = poolListObj()
-    poolObj.iscsiadmHost = iscsiadm(host)
-    poolObj.targetIpAddress = args.target
-    poolObj.port = iscsiTargetPort
-    iscsiAdmClientList.append(poolObj)
+    pool_obj = PoolListObj()
+    pool_obj.iscsiadm_host = Iscsiadm(host)
+    pool_obj.target_ip_address = args.target
+    pool_obj.port = iscsi_target_port
+    iscsiadm_client_list.append(pool_obj)
 
 
 
-discoveriesThreadPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+discoveries_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 discoveries=[]
 # use the discoveries thread pool executor to have iscsiadm discover targets.
-with discoveriesThreadPool as discoveryExecutor:
-    for client in iscsiAdmClientList:
-        fut = discoveryExecutor.submit(discoverTargets, client)
+with discoveries_thread_pool as discovery_executor:
+    for client in iscsiadm_client_list:
+        fut = discovery_executor.submit(discover_targets, client)
         discoveries.append(fut)
 
 # As the jobs are completed, print out the results
@@ -92,12 +92,12 @@ for fut in concurrent.futures.as_completed(discoveries):
         returncode |= fut.result()
 
 
-loginsThreadPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+logins_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 logins=[]
 # use the logins thread pool executor to have iscsiadm log in to the targets.
-with loginsThreadPool as loginExecutor:
-    for client in iscsiAdmClientList:
-        fut = loginExecutor.submit(logIntoTargets, client)
+with logins_thread_pool as login_executor:
+    for client in iscsiadm_client_list:
+        fut = login_executor.submit(log_in_to_targets, client)
         logins.append(fut)
 
 # As the jobs are completed, print out the results
@@ -110,12 +110,12 @@ for fut in concurrent.futures.as_completed(logins):
 # FIXME add code here to run IO to the targets from or do some other testing
 
 
-logoutThreadPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+logout_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 logouts=[]
 # use the logout thread pool executor to have iscsiadm logout all known targets.
-with logoutThreadPool as logoutExecutor:
-    for client in iscsiAdmClientList:
-        fut = logoutExecutor.submit(logoutTargets, client)
+with logout_thread_pool as logout_executor:
+    for client in iscsiadm_client_list:
+        fut = logout_executor.submit(logout_targets, client)
         logouts.append(fut)
 
 # As the jobs are completed, print out the results
@@ -124,7 +124,7 @@ for fut in concurrent.futures.as_completed(logouts):
         returncode |= fut.result()
 
 # shutdown the iperf3 server
-cleanUp(iscsiAdmClientList)
+clean_up(iscsiadm_client_list)
 
 exit(returncode)
 

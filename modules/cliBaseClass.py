@@ -1,41 +1,41 @@
 import logging
 import subprocess
 
-class cliBase( ):
-    def __init__(self, ipAddress ):
-        self.ipAddress = ipAddress
-        self.cliLogger = logging.getLogger(__name__)
-        self.cliLogger.setLevel(logging.DEBUG)
+class CliBase( ):
+    def __init__(self, ip_address ):
+        self.ip_address = ip_address
+        self.cli_logger = logging.getLogger(__name__)
+        self.cli_logger.setLevel(logging.DEBUG)
 
     def __str__(self):
-        return f"{self.ipAddress}"
+        return f"{self.ip_address}"
 
     def __repr__(self):
-        return f"{self.ipAddress}"
+        return f"{self.ip_address}"
 
-    def executeBashCommand(self, cmdString):
+    def execute_bash_command(self, cmd_string):
         """ssh into the server and execute the passed in command. return the result"""
-        result = self.executeBashCommandWithTimeout(cmdString, 30)
+        result = self.execute_bash_command_with_timeout(cmd_string, 30)
         return result
 
 
-    def executeBashCommandWithTimeout(self, cmdString, userTimeout):
+    def execute_bash_command_with_timeout(self, cmd_string, user_timeout):
         """ssh into the server and execute the passed in command with user defined timeout. return the result"""
         result = None
-        self.cliLogger.info('sending %s' % cmdString)
+        self.cli_logger.info('sending %s' % cmd_string)
 
-        sshString = "ssh %s " % (self.ipAddress)
-        sshString += '"' + cmdString + '"'
+        ssh_string = "ssh %s " % (self.ip_address)
+        ssh_string += '"' + cmd_string + '"'
 
-        self.cliLogger.debug('sending %s' % sshString)
+        self.cli_logger.debug('sending %s' % ssh_string)
         try:
-            result = subprocess.run(sshString, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                    timeout=userTimeout)
+            result = subprocess.run(ssh_string, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                    timeout=user_timeout)
 
         except subprocess.TimeoutExpired:
-            self.cliLogger.error('%s timedout!', sshString)
+            self.cli_logger.error('%s timedout!', ssh_string)
 
         if result.returncode != 0:
-            self.cliLogger.error('%s', result.stderr)
+            self.cli_logger.error('%s', result.stderr)
 
         return result

@@ -2,9 +2,9 @@ import argparse
 import logging
 import datetime
 
-class scriptBase( ):
+class ScriptBase( ):
 
-    def __init__(self, logFilePrefix):
+    def __init__(self, log_file_prefix):
         self.parser = argparse.ArgumentParser()
         self.parser.add_argument('-slvl', type=int, choices=range(0, 6))
         self.parser.add_argument('-flvl', type=int, choices=range(0, 6))
@@ -13,56 +13,56 @@ class scriptBase( ):
         self.ch = logging.StreamHandler()
 
         self.utcNow = datetime.datetime.utcnow()
-        self.logfileDirectory = '/tmp'
-        self.logfileName = ('%s/%s_' % (self.logfileDirectory,logFilePrefix) +
+        self.log_file_directory = '/tmp'
+        self.log_file_name = ('%s/%s_' % (self.log_file_directory,log_file_prefix) +
                             self.utcNow.strftime('%Y_%m_%d__%H_%M_%S' + '.log') )
-        self.fh = logging.FileHandler(self.logfileName)
-        self.scriptBaseLogger = None
+        self.fh = logging.FileHandler(self.log_file_name)
+        self.script_base_logger = None
 
     def __str__(self):
-        return f"{self.utcNow} {self.logfileName}"
+        return f"{self.utcNow} {self.log_file_name}"
 
     def __repr__(self):
-        return f"{self.utcNow} {self.logfileName}"
+        return f"{self.utcNow} {self.log_file_name}"
 
-    def commandLineToLoggingLevelOptions(self, cmdLineLevel):
+    def command_line_to_logging_level_options(self, cmd_line_level):
         """convert command line logging level declarations to logging class definitions"""
         level = None
-        if cmdLineLevel == 0:
+        if cmd_line_level == 0:
             level = logging.NOTSET      # value is 0
-        elif cmdLineLevel == 1:
+        elif cmd_line_level == 1:
             level = logging.DEBUG       # value is 10
-        elif cmdLineLevel == 2:
+        elif cmd_line_level == 2:
             level = logging.INFO        # value is 20
-        elif cmdLineLevel == 3:
+        elif cmd_line_level == 3:
             level = logging.WARNING     # value is 30
-        elif cmdLineLevel == 4:
+        elif cmd_line_level == 4:
             level = logging.ERROR       # value is 40
-        elif cmdLineLevel == 5:
+        elif cmd_line_level == 5:
             level = logging.CRITICAL    # value is 50
         else:
             level = logging.INFO        # set INFO as default
 
         return level
 
-    def setLogging(self,slvl,flvl):
+    def set_logging(self, slvl, flvl):
         """set up logging for the script. use the user defined logging level from command
         line to set the level in the stream and file handlers"""
-        screenLoggingLevel = self.commandLineToLoggingLevelOptions(slvl)
-        self.ch.setLevel(screenLoggingLevel)
+        screen_logging_level = self.command_line_to_logging_level_options(slvl)
+        self.ch.setLevel(screen_logging_level)
 
-        fileLoggingLevel = self.commandLineToLoggingLevelOptions(flvl)
-        self.ch.setLevel(fileLoggingLevel)
+        file_logging_level = self.command_line_to_logging_level_options(flvl)
+        self.ch.setLevel(file_logging_level)
 
         # add script instance formatter to handlers
         self.ch.setFormatter(self.formatter)
         self.fh.setFormatter(self.formatter)
 
-        self.scriptBaseLogger = logging.getLogger()
-        self.scriptBaseLogger.setLevel(logging.DEBUG)
-        self.scriptBaseLogger.addHandler(self.ch)
-        self.scriptBaseLogger.addHandler(self.fh)
-        self.scriptBaseLogger.critical("logs saved at: %s" % self.logfileName)
+        self.script_base_logger = logging.getLogger()
+        self.script_base_logger.setLevel(logging.DEBUG)
+        self.script_base_logger.addHandler(self.ch)
+        self.script_base_logger.addHandler(self.fh)
+        self.script_base_logger.critical("logs saved at: %s" % self.log_file_name)
 
 
 

@@ -1,30 +1,30 @@
 import logging
-from modules.hostBaseClass import hostBase
+from modules.hostBaseClass import HostBase
 
-class iperfServer(hostBase):
-    def __init__(self, ipAddress ):
-        super().__init__(ipAddress)
-        self.iperfServerLogger = logging.getLogger(__name__)
-        self.iperfServerLogger.setLevel(logging.DEBUG)
-        self.iperf3Name = 'iperf3'
+class IperfServer(HostBase):
+    def __init__(self, ip_address ):
+        super().__init__(ip_address)
+        self.iperf_server_logger = logging.getLogger(__name__)
+        self.iperf_server_logger.setLevel(logging.DEBUG)
+        self.iperf3_name = 'iperf3'
 
     def __str__(self):
-        return f"{self.ipAddress}"
+        return f"{self.ip_address}"
 
     def __repr__(self):
-        return f"{self.ipAddress}"
+        return f"{self.ip_address}"
 
-    def startIperf3ServerDaemon(self, port=5201):
+    def start_iperf3_server_daemon(self, port=5201):
         """setup the iperf3 server on the host"""
-        self.iperfServerLogger.info( '%s: iperf3 server started on port %d' % (self.ipAddress, port))
-        iperfServerString = f'{self.iperf3Name} -s -D -p {port}'
-        result = self.executeBashCommand(iperfServerString)
+        self.iperf_server_logger.info( '%s: iperf3 server started on port %d' % (self.ip_address, port))
+        iperf_server_string = f'{self.iperf3_name} -s -D -p {port}'
+        result = self.execute_bash_command(iperf_server_string)
         return result
 
-    def stopIperf3ServerDaemon(self):
+    def stop_iperf3_server_daemon(self):
         """stop the iperf3 server on the host"""
-        self.iperfServerLogger.info( '%s: iperf3 server shutting down' % (self.ipAddress))
-        result = self.stopProcess(self.iperf3Name)
+        self.iperf_server_logger.info( '%s: iperf3 server shutting down' % (self.ip_address))
+        result = self.stop_process(self.iperf3_name)
         return result
 
 

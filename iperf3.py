@@ -3,33 +3,33 @@ import logging
 import signal
 from multiprocessing import Process
 import concurrent.futures
-from modules.scriptBaseClass import scriptBase
-from modules.iperfClientClass import iperfClient
-from modules.iperfServerClass import iperfServer
+from modules.scriptBaseClass import ScriptBase
+from modules.iperfClientClass import IperfClient
+from modules.iperfServerClass import IperfServer
 
 
-class poolListObj():
+class PoolListObj():
     pass
 
 # function for threading the IO clients
-def startClientIo( poolObj ):
-    result = poolObj.clientObj.startIperf3Client(poolObj.targetIpAddress, poolObj.port)
+def start_client_io(pool_obj):
+    result = pool_obj.client_obj.start_iperf3_client(pool_obj.target_ip_address, pool_obj.port)
     return result
 
-def startClientIoProcess( poolObj ):
-    result = startClientIo(poolObj)
+def start_client_io_process(pool_obj):
+    result = start_client_io(pool_obj)
     exit(result.returncode)
 
 # cleanup function to shutdown the iperf3 server
-def cleanUp(iperfTarget):
-    result = iperfTarget.stopIperf3ServerDaemon()
+def clean_up(iperf_target):
+    result = iperf_target.stop_iperf3_server_daemon()
     return result
 
 def sigint_cleanup(signum, frame):
     # switch the CTRL-C handler to just exit if is pressed repeatedly
     signal.signal(signal.SIGINT, sigint_exit)
     logger.error('CTRL-C detected')
-    cleanUp(iperfServer)
+    clean_up(iperf_server)
     exit(1)
 
 def sigint_exit(signum, frame):
@@ -37,16 +37,17 @@ def sigint_exit(signum, frame):
     exit(2)
 
 # setup the script object
-executableName = 'iperf3'
-script = scriptBase(executableName)
-iperfClientList=[]
-iperfTarget = None
+executable_name = 'iperf3'
+script = ScriptBase(executable_name)
+iperf_client_list=[]
+iperf_target = None
 
 # add other arguments here to supplement the default arguments in the script base class
 
 
 
-script.parser.add_argument('-t','--thread', help="iperf3 client runs in a thread, instead of a process", action="store_true")
+script.parser.add_argument('-t','--thread', help="iperf3 client runs in a thread, instead of a process",
+                           action="store_true")
 script.parser.add_argument('-p','--port', help="iperf3 server user defined port", type=int)
 script.parser.add_argument('server', help="iperf3 server ipAddress", type=str)
 script.parser.add_argument('client', help="iperf3 client ipAddress", type=str)
@@ -55,7 +56,7 @@ script.parser.add_argument('client', help="iperf3 client ipAddress", type=str)
 args = script.parser.parse_args()
 
 # initialize the script logging once.
-script.setLogging(args.slvl,args.flvl)
+script.set_logging(args.slvl, args.flvl)
 
 # create the logger object for this file
 logger = logging.getLogger()
@@ -64,27 +65,27 @@ logger.setLevel(logging.DEBUG)
 # setup the clean-up handler
 signal.signal(signal.SIGINT, sigint_cleanup)
 
-iperf3Port = 5201  # this is the default value
+iperf3_port = 5201  # this is the default value
 if args.port:
-    iperf3Port = args.port
+    iperf3_port = args.port
 
 returncode = 0
 
 # create the iperf3 target object to test against
-iperfTarget = iperfServer(args.server)
+iperf_target = IperfServer(args.server)
 
 
 # create a client as specified on the commandline and put them in an iterable object
-poolObj = poolListObj()
-logfile = f"{script.logfileDirectory}/{executableName}_{args.client}__{script.utcNow.strftime('%Y_%m_%d__%H_%M_%S')}.dat"
-poolObj.clientObj = iperfClient(args.client, logfile)
-poolObj.targetIpAddress = args.server
-poolObj.port = iperf3Port
-iperfClientList.append(poolObj)
+pool_obj = PoolListObj()
+logfile = f"{script.log_file_directory}/{executable_name}_{args.client}__{script.utcNow.strftime('%Y_%m_%d__%H_%M_%S')}.dat"
+pool_obj.client_obj = IperfClient(args.client, logfile)
+pool_obj.target_ip_address = args.server
+pool_obj.port = iperf3_port
+iperf_client_list.append(pool_obj)
 
 
 # start the iperf3 server
-result = iperfTarget.startIperf3ServerDaemon(iperf3Port)
+result = iperf_target.start_iperf3_server_daemon(iperf3_port)
 
 # check that the server returned success
 if result.returncode != 0:
@@ -94,28 +95,28 @@ if result.returncode != 0:
 # A. using a process to run iperf3 client
 if __name__ == '__main__' and not args.thread:
     processes = []
-    for client in iperfClientList:
-        proc = Process(target=startClientIoProcess, args=(client,))
+    for client in iperf_client_list:
+        proc = Process(target=start_client_io_process, args=(client,))
         proc.start()
         processes.append(proc)
 
     for proc in processes:
         proc.join()
         if proc.exitcode:
-            logger.error( f'{executableName} returned {proc.exitcode}' )
+            logger.error(f'{executable_name} returned {proc.exitcode}')
         else:
-            logger.info(f'process based {executableName} completed successfully ')
+            logger.info(f'process based {executable_name} completed successfully')
 
         returncode |= proc.exitcode
 
 else:
     # OR B. using a thread pool to run iperf3 client
-    iperfClientPool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+    iperf_client_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
     futures=[]
     # use the thread pool executor to have the iperf3 clients stream data
-    with iperfClientPool as executor:
-        for client in iperfClientList:
-            fut = executor.submit(startClientIo, client)
+    with iperf_client_pool as executor:
+        for client in iperf_client_list:
+            fut = executor.submit(start_client_io, client)
             futures.append(fut)
 
     # As the jobs are completed, check the results
@@ -123,12 +124,12 @@ else:
         if fut.result():
             returncode |= fut.result().returncode
             if returncode != 0:
-                logger.error( fut.result() )
+                logger.error(fut.result())
             else:
-                logger.info(f'thread based {executableName} completed successfully')
+                logger.info(f'thread based {executable_name} completed successfully')
 
 # shutdown the iperf3 server
-returncode |= cleanUp(iperfTarget)
+returncode |= clean_up(iperf_target)
 
 exit(returncode)
 
