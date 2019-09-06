@@ -3,6 +3,7 @@ import logging
 import datetime
 
 class ScriptBase( ):
+    """This is a class to contain all the common script setup and define common script arguments"""
 
     def __init__(self, log_file_prefix):
         self.parser = argparse.ArgumentParser()
@@ -26,8 +27,13 @@ class ScriptBase( ):
         return f"{self.utcNow} {self.log_file_name}"
 
     def command_line_to_logging_level_options(self, cmd_line_level):
-        """convert command line logging level declarations to logging class definitions"""
+        """convert command line logging level declarations to logging class definitions. Valid inputs are 0 through 5
+        All other inputs are invalid and should return the defaulted logging level of INFO."""
         level = None
+
+        if type(cmd_line_level) not in [int]:
+            raise TypeError( 'cmd_line_level must be a non-negative real number from 0 to 5' )
+
         if cmd_line_level == 0:
             level = logging.NOTSET      # value is 0
         elif cmd_line_level == 1:

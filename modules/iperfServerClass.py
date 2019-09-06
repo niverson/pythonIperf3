@@ -2,6 +2,8 @@ import logging
 from modules.hostBaseClass import HostBase
 
 class IperfServer(HostBase):
+    """This class is used to model an iperf3 server for an iperf3 client to stream data to.
+    This class takes an ip address """
     def __init__(self, ip_address ):
         super().__init__(ip_address)
         self.iperf_server_logger = logging.getLogger(__name__)

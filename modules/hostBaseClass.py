@@ -2,6 +2,8 @@ import logging
 from modules.cliBaseClass import CliBase
 
 class HostBase(CliBase):
+    """This class that is used to execute a shell command on a targeted server and handle command specific responses.
+    This class takes an ip address."""
     def __init__(self, ip_address ):
         super().__init__(ip_address)
         self.host_logger = logging.getLogger(__name__)

@@ -2,6 +2,9 @@ import logging
 import subprocess
 
 class CliBase( ):
+    """This is a generic cli class that is used to ssh into a server and execute a shell command.
+    This class takes an ip address. The object will use that ip address to target the system
+    whenever the instance methods are called. """
     def __init__(self, ip_address ):
         self.ip_address = ip_address
         self.cli_logger = logging.getLogger(__name__)

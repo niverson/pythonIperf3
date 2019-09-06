@@ -3,6 +3,8 @@ import re
 from modules.hostBaseClass import HostBase
 
 class IscsiadmTargets():
+    """This a helper class that is used to define what details are needed for an iscsiadm target.
+    This class takes an ip address."""
     def __init__(self, ip_address, iqn, port):
         self.ip_address = ip_address
         self.iqn = iqn
@@ -16,7 +18,7 @@ class IscsiadmTargets():
 
 
 class Iscsiadm(HostBase):
-
+    """This class that is used to discover, login, and logout an iscsi target using iscsiadm."""
     def __init__(self, ip_address):
         super().__init__(ip_address)
         self.iscsiadm_logger = logging.getLogger(__name__)

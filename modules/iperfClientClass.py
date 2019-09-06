@@ -3,6 +3,8 @@ import re
 from modules.hostBaseClass import HostBase
 
 class IperfClient(HostBase):
+    """This class is used to start an iperf3 client to stream data to the iperf3 server.
+        This class takes an ip address and an iperf3 log file name."""
     def __init__(self, ip_address, log_file):
         super().__init__(ip_address)
         self.iperf_client_logger = logging.getLogger(__name__)

@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+
+"""iscsiadm script.
+This script allows the user to perform an iscsi discovery and login from an iscsi initiator to an iscsi target
+on another system.
+The iscsi target has to be previously setup to allow the initiator to login with the proper credentials.
+"""
+
 import logging
 import signal
 import concurrent.futures

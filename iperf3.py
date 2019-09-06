@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+"""iperf3 test script.
+This script allows the user to run a quick iperf3 test from a client on one system to the server on another system.
+"""
 import logging
 import signal
 from multiprocessing import Process
@@ -43,9 +47,6 @@ iperf_client_list=[]
 iperf_target = None
 
 # add other arguments here to supplement the default arguments in the script base class
-
-
-
 script.parser.add_argument('-t','--thread', help="iperf3 client runs in a thread, instead of a process",
                            action="store_true")
 script.parser.add_argument('-p','--port', help="iperf3 server user defined port", type=int)
