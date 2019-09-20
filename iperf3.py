@@ -17,7 +17,7 @@ class PoolListObj():
 
 # function for threading the IO clients
 def start_client_io(pool_obj):
-    result = pool_obj.client_obj.start_iperf3_client(pool_obj.target_ip_address, pool_obj.port)
+    result = pool_obj.client_obj.start_iperf3_client(pool_obj.target_ip_address, pool_obj.useJson, pool_obj.port )
     return result
 
 def start_client_io_process(pool_obj):
@@ -50,6 +50,7 @@ iperf_target = None
 script.parser.add_argument('-t','--thread', help="iperf3 client runs in a thread, instead of a process",
                            action="store_true")
 script.parser.add_argument('-p','--port', help="iperf3 server user defined port", type=int)
+script.parser.add_argument('-j','--useJson', help="iperf3 client return data in json", action="store_true")
 script.parser.add_argument('server', help="iperf3 server ipAddress", type=str)
 script.parser.add_argument('client', help="iperf3 client ipAddress", type=str)
 
@@ -82,6 +83,7 @@ logfile = f"{script.log_file_directory}/{executable_name}_{args.client}__{script
 pool_obj.client_obj = IperfClient(args.client, logfile)
 pool_obj.target_ip_address = args.server
 pool_obj.port = iperf3_port
+pool_obj.useJson = args.useJson
 iperf_client_list.append(pool_obj)
 
 

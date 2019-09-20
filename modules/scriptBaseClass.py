@@ -7,8 +7,8 @@ class ScriptBase( ):
 
     def __init__(self, log_file_prefix):
         self.parser = argparse.ArgumentParser()
-        self.parser.add_argument('-slvl', type=int, choices=range(0, 6))
-        self.parser.add_argument('-flvl', type=int, choices=range(0, 6))
+        self.parser.add_argument('-slvl', type=int, default=2, choices=range(0, 6))
+        self.parser.add_argument('-flvl', type=int, default=2, choices=range(0, 6))
 
         self.formatter = logging.Formatter('%(asctime)s - %(name)25s - %(levelname)8s - %(message)s')
         self.ch = logging.StreamHandler()

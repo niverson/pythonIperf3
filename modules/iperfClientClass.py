@@ -1,5 +1,5 @@
 import logging
-import re
+import json
 from modules.hostBaseClass import HostBase
 
 class IperfClient(HostBase):
@@ -10,7 +10,7 @@ class IperfClient(HostBase):
         self.iperf_client_logger = logging.getLogger(__name__)
         self.iperf_client_logger.setLevel(logging.DEBUG)
         self.log_file = log_file
-        self.iperf_client_logger.info( 'iperf3 for %s uses logfile %s' % ( ip_address, log_file))
+
 
     def __str__(self):
         return f"{self.ip_address}"
@@ -19,10 +19,19 @@ class IperfClient(HostBase):
         return f"{self.ip_address}"
 
 
-    def start_iperf3_client(self, target_ip_address, port=5201):
-        """have the iperf3 client system start simple bandwidth test. results are saved to a file."""
-        iperf_client_string = 'iperf3 -c %s --logfile %s -i 5 -f M -p %d' % (target_ip_address, self.log_file, port)
+    def start_iperf3_client(self, target_ip_address, useJson, port=5201):
+        """have the iperf3 client system start simple bandwidth test. results are saved to a file if json is not
+        specified."""
+
+        self.iperf_client_logger.info('iperf3 for %s uses logfile %s' % (self.ip_address, self.log_file))
+        #iperf_client_string = 'iperf3 -c %s --logfile %s -i 5 -f M -p %d' % (target_ip_address, self.log_file, port)
+        iperf_client_string = 'iperf3 -c %s -i 5 -f M -p %d' % (target_ip_address, port)
+
+        if (useJson == True):
+            iperf_client_string += " -J"
+
         self.iperf_client_logger.info('iperf3 client running to %s:%d' % (target_ip_address, port))
         result = self.execute_bash_command(iperf_client_string)
+
         return result
 
