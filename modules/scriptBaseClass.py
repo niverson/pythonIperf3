@@ -58,7 +58,7 @@ class ScriptBase( ):
         self.ch.setLevel(screen_logging_level)
 
         file_logging_level = self.command_line_to_logging_level_options(flvl)
-        self.ch.setLevel(file_logging_level)
+        self.fh.setLevel(file_logging_level)
 
         # add script instance formatter to handlers
         self.ch.setFormatter(self.formatter)
