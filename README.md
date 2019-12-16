@@ -5,7 +5,7 @@ This project has two script files: iperf3.py and iscsiAdm.py
 written for python3(3.6.8)
 
 
-iperf3.py is a quick bandwidth test between a server and n number of clients as defined on the commandline. 
+iperf3.py is a quick bandwidth test between a server and client as defined on the commandline. 
 iperf3.py will first start an iperf3 server on the "server" system. 
 Next, iperf3.py will use the "client" systems to drive traffic to the "server" system.
 Finally, iperf3.py will kill the iperf3 server on the "server" system.
